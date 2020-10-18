@@ -1,0 +1,20 @@
+{
+    "name": "alex19pov31/memcached-client",
+    "description": "Memcached client written on php",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alexander Nesterov",
+            "email": "alex19pov31@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "MemcachedClient\\": "src/"
+        }
+    },
+    "require": {
+        "psr/simple-cache": "^1.0"
+    }
+}
