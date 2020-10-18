@@ -4,8 +4,10 @@
 namespace MemcachedClient;
 
 
+use MemcachedClient\Commands\AuthCommand;
 use MemcachedClient\Commands\MetaNoOpCommand;
 use MemcachedClient\Interfaces\ClientInterface;
+use MemcachedClient\Interfaces\CommandInterface;
 use MemcachedClient\Interfaces\CommandResultInterface;
 
 class Client implements ClientInterface
@@ -27,6 +29,10 @@ class Client implements ClientInterface
      */
     private $timeout;
     private $socket;
+    /**
+     * @var AuthCommand
+     */
+    private $authCommand;
 
     protected function __construct(array $params)
     {
@@ -34,6 +40,12 @@ class Client implements ClientInterface
         $this->port = $params['port'] ?? null;
         $this->unixSocket = $params['unix_socket'] ?? null;
         $this->timeout = $params['timeout'] ?? 1;
+    }
+
+    public function setAuth(string $login, string $password): self
+    {
+        $this->authCommand = new AuthCommand($this, $login, $password);
+        return $this;
     }
 
     public static function initFromUnixSocket(string $unixSocket, int $timeout = 1): self
@@ -95,10 +107,16 @@ class Client implements ClientInterface
     public function sendCommand($command, int $commandCount = 1): CommandResultInterface
     {
         $metaNoOpCommand = new MetaNoOpCommand($this);
+        $useAuth = false;
+        if ($this->authCommand instanceof CommandInterface) {
+            $command = $this->authCommand->getCommand().$metaNoOpCommand->getCommand().$command;
+            $useAuth = true;
+            $commandCount++;
+        }
         $command .= $metaNoOpCommand->getCommand();
 
         $this->connect();
         socket_send($this->socket, $command, strlen($command), MSG_EOR);
-        return new CommandResult($this, $commandCount);
+        return new CommandResult($this, $commandCount, null, $useAuth);
     }
 }

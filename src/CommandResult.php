@@ -14,15 +14,31 @@ class CommandResult implements CommandResultInterface
     /**
      * @var ClientInterface
      */
-    private ClientInterface $client;
-    private string $resultData;
-    private int $commandCount;
+    private $client;
+    /**
+     * @var string
+     */
+    private $resultData;
+    /**
+     * @var int
+     */
+    private $commandCount;
+    /**
+     * @var bool
+     */
+    private $useAuth;
 
-    public function __construct(ClientInterface $client, int $commandCount = 1, string $resultData = null)
+    public function __construct(
+        ClientInterface $client,
+        int $commandCount = 1,
+        string $resultData = null,
+        bool $useAuth = false
+    )
     {
         $this->client = $client;
         $this->commandCount = $commandCount;
         $this->resultData = $resultData ?? $this->read();
+        $this->useAuth = $useAuth;
     }
 
     /**
@@ -32,7 +48,11 @@ class CommandResult implements CommandResultInterface
     {
         $list = [];
         $dataList = explode(MetaNoOpCommand::RESPONSE, $this->resultData);
-        foreach ($dataList as $data) {
+        foreach ($dataList as $i => $data) {
+            if ($this->useAuth && $i === 0) {
+                continue;
+            }
+
             $list[] = new static($this->client, 1, $data);
         }
 
@@ -62,8 +82,23 @@ class CommandResult implements CommandResultInterface
         return $data;
     }
 
+    public function isSuccessAuth(): bool
+    {
+        $resultDataList = explode(MetaNoOpCommand::RESPONSE, $this->resultData);
+        if (!$this->useAuth || count($resultDataList) < 2) {
+            return false;
+        }
+
+        return current($resultDataList) === 'STORED\r\n';
+    }
+
     public function getResultData()
     {
-        return $this->resultData;
+        $resultDataList = explode(MetaNoOpCommand::RESPONSE, $this->resultData);
+        if (!$this->useAuth || count($resultDataList) < 2) {
+            return current($resultDataList);
+        }
+
+        return $resultDataList[1];
     }
 }

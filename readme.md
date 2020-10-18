@@ -18,6 +18,14 @@ use MemcachedClient\Client;
 $client = Client::initFromUnixSocket('/usr/run/memcached.sock');
 ```
 
+### Авторизация:
+```php
+use MemcachedClient\Client;
+
+$client = Client::initFromInetSocket('127.0.0.1', 11211);
+$client->setAuth('username', 'password');
+```
+
 ### Запись данных:
 
 ```php
@@ -82,6 +90,7 @@ foreach($commandResultList as $command) {
 # Simple cache PSR-16
 
 ```php
+use MemcachedClient\Client;
 use MemcachedClient\CacheManager;
 
 $client = Client::initFromInetSocket('127.0.0.1', 11211);
