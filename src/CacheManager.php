@@ -24,30 +24,53 @@ class CacheManager implements CacheInterface
         $this->client = $client;
     }
 
+    /**
+     * @param string $key
+     * @param null $default
+     * @return mixed|null
+     */
     public function get($key, $default = null)
     {
         $getCommand = new GetCommand($this->client, $key);
         return $getCommand->execute()->getValue() ?? $default;
     }
 
+    /**
+     * @param string $key
+     * @param mixed $value
+     * @param null $ttl
+     * @return bool
+     */
     public function set($key, $value, $ttl = null)
     {
         $setCommand = new SetCommand($this->client, $key, (int)$ttl, $value);
         return $setCommand->execute()->isSuccess();
     }
 
+    /**
+     * @param string $key
+     * @return bool
+     */
     public function delete($key)
     {
         $deleteCommand = new DeleteCommand($this->client, $key);
         return $deleteCommand->execute()->isSuccess();
     }
 
+    /**
+     * @return bool
+     */
     public function clear()
     {
         $flushCommand = new FlushAllCommand($this->client);
         return $flushCommand->execute()->isSuccess();
     }
 
+    /**
+     * @param iterable $keys
+     * @param null $default
+     * @return array|iterable
+     */
     public function getMultiple($keys, $default = null)
     {
         $values = [];
@@ -68,6 +91,11 @@ class CacheManager implements CacheInterface
         return $values;
     }
 
+    /**
+     * @param iterable $values
+     * @param null $ttl
+     * @return bool
+     */
     public function setMultiple($values, $ttl = null)
     {
         $commandList = [];
@@ -89,6 +117,10 @@ class CacheManager implements CacheInterface
         return true;
     }
 
+    /**
+     * @param iterable $keys
+     * @return bool
+     */
     public function deleteMultiple($keys)
     {
         $commandList = [];
@@ -110,6 +142,10 @@ class CacheManager implements CacheInterface
         return true;
     }
 
+    /**
+     * @param string $key
+     * @return bool
+     */
     public function has($key)
     {
         $getCommand = new GetCommand($this->client, $key);

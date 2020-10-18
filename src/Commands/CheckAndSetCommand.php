@@ -45,11 +45,9 @@ class CheckAndSetCommand extends BaseCommand
         $this->casValue = $casValue;
     }
 
-    public function execute(): CommandResultInterface
+    public function getCommand(): string
     {
         $countBytes = strlen($this->value);
-        return $this->client->sendCommand(
-            "{$this->baseCommand} {$this->key} 0 {$this->ttl} {$countBytes} {$this->casValue}\r\n{$this->value}\r\n"
-        );
+        return "{$this->baseCommand} {$this->key} 0 {$this->ttl} {$countBytes} {$this->casValue}\r\n{$this->value}\r\n";
     }
 }
