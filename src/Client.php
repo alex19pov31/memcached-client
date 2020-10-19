@@ -78,6 +78,8 @@ class Client implements ClientInterface
         $this->close();
         if (!empty($this->unixSocket)) {
             $this->socket = socket_create(AF_UNIX, SOCK_STREAM, 0);
+            socket_set_option($this->socket, SOL_SOCKET, SO_RCVTIMEO, ['sec' => $this->timeout, 'usec' => 0]);
+            socket_set_option($this->socket, SOL_SOCKET, SO_SNDTIMEO, ['sec' => $this->timeout, 'usec' => 0]);
             socket_connect($this->socket, $this->unixSocket);
         } else if(!empty($this->host) && $this->port > 0) {
             $data = socket_addrinfo_lookup($this->host, $this->port);

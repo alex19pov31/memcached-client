@@ -28,7 +28,7 @@ class AuthCommand extends BaseCommand
     {
         $authStr = "{$this->login} {$this->password}";
         $length = strlen($authStr);
-        return "set auth 0 0 {$length}\r\nusername password\r\n{$authStr}\r\n";
+        return "set auth 0 0 {$length}\r\n{$authStr}\r\n";
     }
 
     public function isSuccess(): bool
